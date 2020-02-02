@@ -1,0 +1,42 @@
+import serial                                    #import serial library
+from visual import *                             #import visual representation data library
+
+serialData=serial.Serial("COM3",9600)            #import data from arduino sent through serial port
+window = display(title = 'auto-level',
+                 x = 0, y = 0, width = 750, height =1200,
+                 center = (0,0,0), background = (0,0,0))        #design display size
+water=cylinder(pos=(0,-150,0),axis=vector(0,0,0),radius=50,color=color.blue,material=materials.emissive)       #visual for water in tank
+tank=cylinder(pos=(0,-152,0),axis=vector(0,405,0),radius=55,color=color.yellow,opacity=0.2,material=materials.rough)    #visual of tank
+level=label(pos=(0,-200,0),text="level=400cm",height=50,box=false,font="monospace",color=color.green)            #visual of label showing current tank level
+status=label(pos=(100,250,0),text="STATUS",height=25,box=false,font="monospace")                                 #visual for current status label
+conditions=label(pos=(-150,150,0),text="STATUS CONDITIONS",height=15,font="monospace",color=color.red)           #tabledata
+conditionsone=label(pos=(-120,132,0),text="Tank Level < 200",height=12,font="monospace",box=false)               #tabledata
+statusone=box(pos=(-190,130,0),height=12,width=5,length=20,material=materials.emissive,color=color.green)        #tabledata
+conditionstwo=label(pos=(-120,116,0),text="Tank Level > 200",height=12,font="monospace",box=false)               #tabledata
+statustwo=box(pos=(-190,116,0),height=12,width=5,length=20,material=materials.emissive,color=color.yellow)       #tabledata
+conditionsthree=label(pos=(-120,100,0),text="Tank Level Full",height=12,font="monospace",box=false)              #tabledata
+statusthree=box(pos=(-190,101,0),height=12,width=5,length=20,material=materials.emissive,color=color.red)        #tabledata
+light=box(pos=(100,200,0),height=50,width=10,length=50,material=materials.emissive,color=color.red)              #statusindicator
+while(1==1):
+    rate(20)
+    if(serialData.inWaiting()>0):  #if data is available at serial port than start program
+        variableData=serialData.readline()  #read the data from serial port and store in variableData variable
+        waterData=float(variableData)      #convert received string data into the float
+        if (waterData<200):               #if tank is not filled 50% than 
+            light.color=color.green       #turn green indicator
+        elif (400>waterData>200):         #if tank water level is greater than 50% but not completely filled
+            light.color=color.yellow      #turn yellow indicator 
+        elif (waterData>398):             #if tank is sufficiently filled
+            light.color=color.red         #turn red indicator
+        water.axis=vector(0,waterData,0)  #control water level according to the received data from sensor
+        leveldata=waterData*0.25          #convert the data to the appropriately
+        stat="LEVEL ="+str(leveldata)+" %" #convert float data to the string value to be displayed
+        level.text=stat                   #display the current tank level
+        water
+        tank
+        light
+        level
+    
+
+
+        
